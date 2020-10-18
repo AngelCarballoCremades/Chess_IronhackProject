@@ -23,7 +23,7 @@ class Piece(object):
         return f'{self.type}'
 
     def move_king(self,actual_position):
-        """This functions is for kings only, takes actual position on the board [row,column] and returns an array os possible moves not considering friends or foes"""
+        """This functions is for kings only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
         if self.type != "king":
             raise TypeError('Not "king" piece type')
 
@@ -52,7 +52,7 @@ class Piece(object):
         return pos_mov
 
     def move_pawn(self,actual_position):
-        """This functions is for kings only, takes actual position on the board [row,column] and returns an array os possible moves not considering friends or foes"""
+        """This functions is for pawns only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
         if self.type != "pawn":
             raise TypeError('Not "pawn" piece type')
 
@@ -69,12 +69,12 @@ class Piece(object):
 
         if self.team == 'White':
             columns = [1]
-            if a_c == 1:
+            if a_c == 1: # considering first pawn movement can be 2 squares
                 columns.append(2)
 
         if self.team == 'Black':
-            columns = [-1]
-            if a_c == 6:
+            columns = [-1] #Blacks move in negative direction, left
+            if a_c == 6: # considering first pawn movement can be 2 squares
                 columns.append(-2)
 
 
@@ -82,6 +82,23 @@ class Piece(object):
         pos_mov = [[a_r+row,a_c+column] for row in rows for column in columns if not (row!=0 and column in [2,-2])]
 
         return pos_mov
+
+    def move_knight(self,actual_position):
+        """This functions is for knights only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
+        if self.type != "knight":
+            raise TypeError('Not "knight" piece type')
+
+        a_r,a_c = actual_position #piece actual row and column indexes
+        pos_mov = [] #array containing possible moves of piece
+
+        # Building the 8 possible places for the knight
+        pos_mov = [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]]
+
+        #Possible movement array, not considering friends or foes. Conditional to avoid out of board places.
+        pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_c+column>=0 and a_r+row<=7 and a_c+column<=7]
+
+        return pos_mov
+
 
     def possible_moves(self, actual_position:list, board):
         """This function returns the positions the piece can move to, taking into account board size, allies and enemies position"""
@@ -148,13 +165,17 @@ board = Board()
 
 # print(new_board.board)
 
-print(board)
-board.kill_piece([3,1])
-board.board[3][0].possible_moves([3,0],board.board)
+# print(board)
+# board.kill_piece([3,1])
+# board.board[3][0].possible_moves([3,0],board.board)
 print(board)
 
-print(board.board[3][0].move_king([3,0]))
+# print(board.board[3][0].move_king([3,0]))
 # print(board.board[6][1].move_pawn([6,1]))
+print(board.board[1][0].move_knight([1,0]))
+print(board.board[6][0].move_knight([6,0]))
+print(board.board[1][7].move_knight([1,7]))
+print(board.board[6][7].move_knight([6,7]))
 
 
 
