@@ -51,17 +51,37 @@ class Piece(object):
 
         return pos_mov
 
+    def move_pawn(self,actual_position):
+        """This functions is for kings only, takes actual position on the board [row,column] and returns an array os possible moves not considering friends or foes"""
+        if self.type != "pawn":
+            raise TypeError('Not "pawn" piece type')
+
+        a_r,a_c = actual_position #piece actual row and column indexes
+        pos_mov = [] #array containing possible moves of piece
+
+        #Checking which rows the piece can move to, preventing out of board positions
+        if a_r == 0:
+            rows = [0,1]
+        elif a_r == 7:
+            rows = [-1,0]
+        else:
+            rows = [-1,0,1]
+
+        if self.team == 'White':
+            columns = [1]
+            if a_c == 1:
+                columns.append(2)
+
+        if self.team == 'Black':
+            columns = [-1]
+            if a_c == 6:
+                columns.append(-2)
 
 
+        #Possible movement array, not considering friends or foes. White pawn moves +column, Black pawn moves -column.
+        pos_mov = [[a_r+row,a_c+column] for row in rows for column in columns if not (row!=0 and column in [2,-2])]
 
-                # if board[a_r+1][a_c+c] and (not board[a_r+1][a_c+c] or board[a_r+1][a_c+c].team != self.team):
-                #     pos_mov.append([a_r+1,a_c+c])
-
-                # if board[a_r-1][a_c+c] and board[a_r-1][a_c+c].team != self.team:
-                #     pos_mov.append([a_r-1,a_c+c])
-
-                # if board[a_r][a_c+c] and board[a_r][a_c-c].team != self.team and c != a_c:
-                #     pos_mov.append([a_r,a_c+c])
+        return pos_mov
 
     def possible_moves(self, actual_position:list, board):
         """This function returns the positions the piece can move to, taking into account board size, allies and enemies position"""
@@ -129,8 +149,16 @@ board = Board()
 # print(new_board.board)
 
 print(board)
-# board.kill_piece([3,1])
-# board.board[3][0].possible_moves([3,0],board.board)
-# print(board)
+board.kill_piece([3,1])
+board.board[3][0].possible_moves([3,0],board.board)
+print(board)
 
 print(board.board[3][0].move_king([3,0]))
+# print(board.board[6][1].move_pawn([6,1]))
+
+
+
+
+
+
+
