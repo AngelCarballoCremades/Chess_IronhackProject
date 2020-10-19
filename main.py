@@ -22,20 +22,22 @@ class Piece(object):
     def __str__(self):
         return f'{self.type}'
 
-    def move_king(self,actual_position):
+    def move_king_knight(self,actual_position):
         """This functions is for kings only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
-        if self.type != "king":
-            raise TypeError('Not "king" piece type')
+        if self.type not in ["king","knight"]:
+            raise TypeError('Not "king" or "knight" piece type')
 
         a_r,a_c = actual_position #piece actual row and column indexes
         pos_mov = [] #array containing possible moves of piece
 
-        # 8 possible moves of a king.
-        pos_mov = [[1,0],[1,1],[1,-1],[0,1],[0,-1],[-1,0],[-1,1],[-1,-1]]
+        if self.type == 'king':# 8 possible moves of a king.
+            pos_mov = [[1,0],[1,1],[1,-1],[0,1],[0,-1],[-1,0],[-1,1],[-1,-1]]
 
-        #Possible movement array, not considering friends or foes. Considering board limits.
-        pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_r+row<=7 and a_c+column>=0 and a_c+column<=7]
+        if self.type == 'knight':# Building the 8 possible places for the knight
+            pos_mov = [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]]
 
+        #Possible movement array, not considering friends or foes. Conditional to avoid out of board places.
+        pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_c+column>=0 and a_r+row<=7 and a_c+column<=7]
         return pos_mov
 
     def move_pawn(self,actual_position):
@@ -69,21 +71,21 @@ class Piece(object):
 
         return pos_mov
 
-    def move_knight(self,actual_position):
-        """This functions is for knights only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
-        if self.type != "knight":
-            raise TypeError('Not "knight" piece type')
+    # def move_knight(self,actual_position):
+    #     """This functions is for knights only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
+    #     if self.type != "knight":
+    #         raise TypeError('Not "knight" piece type')
 
-        a_r,a_c = actual_position #piece actual row and column indexes
-        pos_mov = [] #array containing possible moves of piece
+    #     a_r,a_c = actual_position #piece actual row and column indexes
+    #     pos_mov = [] #array containing possible moves of piece
 
-        # Building the 8 possible places for the knight
-        pos_mov = [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]]
+    #     # Building the 8 possible places for the knight
+    #     pos_mov = [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]]
 
-        #Possible movement array, not considering friends or foes. Conditional to avoid out of board places.
-        pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_c+column>=0 and a_r+row<=7 and a_c+column<=7]
+    #     #Possible movement array, not considering friends or foes. Conditional to avoid out of board places.
+    #     pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_c+column>=0 and a_r+row<=7 and a_c+column<=7]
 
-        return pos_mov
+    #     return pos_mov
 
     def move_queen_rook_bishop(self,actual_position):
         """This functions is for queens, bishops or rooks only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
@@ -139,12 +141,12 @@ class Piece(object):
         pos_mov = [] #array containing possible moves of piece within board and analyzing allies and enemies
 
         # Getting possible moves from moves_* methods.
-        if self.type == 'king':
-            board_pos_mov = self.move_king(actual_position)
+        if self.type in ['king','knight']:
+            board_pos_mov = self.move_king_knight(actual_position)
         elif self.type == 'pawn':
             board_pos_mov = self.move_pawn(actual_position)
-        elif self.type == 'knight':
-            board_pos_mov = self.move_knight(actual_position)
+        # elif self.type == 'knight':
+        #     board_pos_mov = self.move_knight(actual_position)
         elif self.type in ['queen','rook','bishop']:
             board_pos_mov = self.move_queen_rook_bishop(actual_position)
 
@@ -231,11 +233,12 @@ class Board(object):
         print('\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t6\t\t7')
         return ""
 
-    def kill_piece(self,position:list):
+    def kill_piece(self,position:list,killed=True):
         """This method kills a piece located at the position [row,column]. Board location becomes None"""
         r,c = position
         if self.board[r][c] != None: #Checking if square is empty
-            print(f'{self.board[r][c].team} {self.board[r][c]} at {r},{c} killed')
+            if killed:
+                print(f'{self.board[r][c].team} {self.board[r][c]} at {r},{c} killed')
             self.board[r][c] = None
         else:
             raise Exception("The indicated position is empty (None)")
@@ -246,18 +249,18 @@ class Board(object):
         a_r,a_c = actual_position
         n_r,n_c = new_position
 
-        if self.board[n_r][n_c] != None:
+        print(f'{self.board[a_r][a_c].team} {self.board[a_r][a_c]} moved to {n_r},{n_c}')
+
+        if self.board[n_r][n_c] != None: #If there's an enemy, kill it
             self.kill_piece([n_r,n_c])
 
         self.board[n_r][n_c] = self.board[a_r][a_c]
-
-        print(f'{self.board[a_r][a_c].team} {self.board[a_r][a_c]} moved to {n_r},{n_c}')
-        self.kill_piece([a_r,a_c])
+        self.kill_piece([a_r,a_c],False)
 
 
 
 
-
+"""Vs cpu hacer elección al azar de pieza y de movimiento"""
 
 
 
@@ -281,13 +284,13 @@ print(board)
 # print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
 # row = 0
-# for row in range(8):
-#     board.kill_piece([row,0])
-#     board.kill_piece([row,6])
+for row in range(8):
+    board.kill_piece([row,1])
+    board.kill_piece([row,6])
 
-# print(board)
+print(board)
 
-# print(board.board[4][6].possible_moves([4,6],board.board))
+print(board.board[1][7].possible_moves([1,7],board.board))
 # print(board.board[6][1].move_pawn([6,1]))
 # print(board.board[1][0].move_knight([1,0]))
 # print(board.board[6][0].move_knight([6,0]))
@@ -296,9 +299,10 @@ print(board)
 # print(board.board[4][0].move_queen_rook_bishop([4,0]))
 # print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
-board.move_piece([2,0],[3,3])
-
-print(board)
+# board.move_piece([2,0],[3,6])
+# print(board)
+# board.move_piece([3,0],[4,6])
+# print(board)
 
 
 
