@@ -64,7 +64,6 @@ class Piece(object):
             if a_c == 6: # considering first pawn movement can be 2 squares
                 columns.append(-2)
 
-
         #Possible movement array, not considering friends or foes. White pawn moves +column, Black pawn moves -column.
         pos_mov = [[a_r+row,a_c+column] for row in rows for column in columns if not (row!=0 and column in [2,-2])]
 
@@ -134,12 +133,64 @@ class Piece(object):
 
 
     def possible_moves(self, actual_position:list, board):
-        """This function returns the positions the piece can move to, uses possible moves of move_* functions, allies and enemies position"""
+        """This function returns the positions the piece can be moved to, uses possible moves of move_* functions (board borders), allies and enemies positions."""
         a_r,a_c = actual_position #piece actual row and column indexes
-        pos_mov = [] #array containing possible moves of piece
+        board_pos_mov = [] #array containing possible moves of piece within board
+        pos_mov = [] #array containing possible moves of piece within board and analyzing allies and enemies
 
-        # if self.type == 'king':
+        # Getting possible moves from moves_* methods.
+        if self.type == 'king':
+            board_pos_mov = self.move_king(actual_position)
+        elif self.type == 'pawn':
+            board_pos_mov = self.move_pawn(actual_position)
+        elif self.type == 'knight':
+            board_pos_mov = self.move_knight(actual_position)
+        elif self.type in ['queen','rook','bishop']:
+            board_pos_mov = self.move_queen_rook_bishop(actual_position)
 
+        # Analyzing possible moves with friends and foes for pawn
+        if self.type == 'pawn':
+            for row,column in board_pos_mov:
+
+                # Checking for moves in horizontal direction
+                if row == a_r:
+                    if board[row][column] == None: #Checking for empty square
+                        pos_mov.append([row,column])
+                    else:
+                        pass # if there is a piece in the square the pawn cannot be moved
+
+                # Checking for moves in diagonal (attacks)
+                else:
+                    if board[row][column] != None: #Checking if there is a piece in the square
+                        if board[row][column].team != self.team: # Checking wether the piece is ally or enemy
+                            pos_mov.append([row,column]) # Append if it is enemy
+                        else:
+                            pass # If the piece is an ally the piece cannot be moved
+
+        # Analyzing possible moves with friends and foes for king and knight
+        if self.type in ['king','knight']:
+            for row,column in board_pos_mov:
+                if board[row][column] == None: #Checking for empty square
+                    pos_mov.append([row,column])
+                elif board[row][column].team != self.team: #Checking for ally or enemy
+                    pos_mov.append([row,column])
+                else:
+                    pass
+        # Analyzing possible moves with friends and foes for queen, rook and bishop
+        elif self.type in ['queen','rook','bishop']:
+            for direction in board_pos_mov: # testing for every movement direction
+                for row,column in direction:
+                    if type(board[row][column]) == type(self): # checking if there is a piece in the square
+                        if board[row][column].team != self.team: # checking piece's team
+                            pos_mov.append([row,column])
+                            break # Movement stops because there is a enemy
+                        else:
+                            break # if the piece in the square is an ally the analyzed piece cannot move further in that direction
+
+                    else:
+                        pos_mov.append([row,column]) # If the square is empty (None) the piece can move in that direction
+
+        return pos_mov
 
 
 class Board(object):
@@ -180,20 +231,23 @@ class Board(object):
         print('\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t6\t\t7')
         return ""
 
-
     def kill_piece(self,position:list):
+        """This method kills a piece located at the position [row,column]. Board location becomes None"""
         r,c = position
-
-        print(f'{self.board[r][c]} at {r},{c} killed')
-
-        self.board[r][c] = None
-
-
-
+        if self.board[r][c] != None: #Checking if square is empty
+            print(f'{self.board[r][c].team} {self.board[r][c]} at {r},{c} killed')
+            self.board[r][c] = None
+        else:
+            raise Exception("The indicated position is empty (None)")
 
 
     def move_piece(self,actual_position,new_position):
         """Changes a piece location to the one indicated"""
+        pass
+
+
+
+
 
 
 
@@ -215,6 +269,21 @@ print(board)
 # print(board.board[4][0].move_queen_rook_bishop([4,0]))
 # print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
+row = 0
+for row in range(8):
+    board.kill_piece([row,0])
+    board.kill_piece([row,6])
+
+print(board)
+
+# print(board.board[4][6].possible_moves([4,6],board.board))
+# print(board.board[6][1].move_pawn([6,1]))
+# print(board.board[1][0].move_knight([1,0]))
+# print(board.board[6][0].move_knight([6,0]))
+# print(board.board[1][7].move_knight([1,7]))
+# print(board.board[6][7].move_knight([6,7]))
+# print(board.board[4][0].move_queen_rook_bishop([4,0]))
+# print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
 
 
