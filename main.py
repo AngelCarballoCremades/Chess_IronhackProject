@@ -30,24 +30,11 @@ class Piece(object):
         a_r,a_c = actual_position #piece actual row and column indexes
         pos_mov = [] #array containing possible moves of piece
 
-        #Checking which columns the piece can move to, preventing out of board positions
-        if a_c == 0:
-            columns = [0,1]
-        elif a_c == 7:
-            columns = [-1,0]
-        else:
-            columns = [-1,0,1]
+        # 8 possible moves of a king.
+        pos_mov = [[1,0],[1,1],[1,-1],[0,1],[0,-1],[-1,0],[-1,1],[-1,-1]]
 
-        #Checking which rows the piece can move to, preventing out of board positions
-        if a_r == 0:
-            rows = [0,1]
-        elif a_r == 7:
-            rows = [-1,0]
-        else:
-            rows = [-1,0,1]
-
-        #Possible movement array, not considering friends or foes.
-        pos_mov = [[a_r+row,a_c+column] for row in rows for column in columns if not(row==0 and column==0)]
+        #Possible movement array, not considering friends or foes. Considering board limits.
+        pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_r+row<=7 and a_c+column>=0 and a_c+column<=7]
 
         return pos_mov
 
@@ -147,7 +134,7 @@ class Piece(object):
 
 
     def possible_moves(self, actual_position:list, board):
-        """This function returns the positions the piece can move to, taking into account board size, allies and enemies position"""
+        """This function returns the positions the piece can move to, uses possible moves of move_* functions, allies and enemies position"""
         a_r,a_c = actual_position #piece actual row and column indexes
         pos_mov = [] #array containing possible moves of piece
 
@@ -219,7 +206,7 @@ print(board)
 # board.board[3][0].possible_moves([3,0],board.board)
 # print(board)
 
-# print(board.board[3][0].move_king([3,0]))
+# print(board.board[3][7].move_king([3,7]))
 # print(board.board[6][1].move_pawn([6,1]))
 # print(board.board[1][0].move_knight([1,0]))
 # print(board.board[6][0].move_knight([6,0]))
