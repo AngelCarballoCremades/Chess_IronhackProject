@@ -241,9 +241,20 @@ class Board(object):
             raise Exception("The indicated position is empty (None)")
 
 
-    def move_piece(self,actual_position,new_position):
-        """Changes a piece location to the one indicated"""
-        pass
+    def move_piece(self,actual_position:list,new_position:list):
+        """Changes a piece location to the one indicated, must be a valid position"""
+        a_r,a_c = actual_position
+        n_r,n_c = new_position
+
+        if self.board[n_r][n_c] != None:
+            self.kill_piece([n_r,n_c])
+
+        self.board[n_r][n_c] = self.board[a_r][a_c]
+
+        print(f'{self.board[a_r][a_c].team} {self.board[a_r][a_c]} moved to {n_r},{n_c}')
+        self.kill_piece([a_r,a_c])
+
+
 
 
 
@@ -269,12 +280,12 @@ print(board)
 # print(board.board[4][0].move_queen_rook_bishop([4,0]))
 # print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
-row = 0
-for row in range(8):
-    board.kill_piece([row,0])
-    board.kill_piece([row,6])
+# row = 0
+# for row in range(8):
+#     board.kill_piece([row,0])
+#     board.kill_piece([row,6])
 
-print(board)
+# print(board)
 
 # print(board.board[4][6].possible_moves([4,6],board.board))
 # print(board.board[6][1].move_pawn([6,1]))
@@ -285,7 +296,9 @@ print(board)
 # print(board.board[4][0].move_queen_rook_bishop([4,0]))
 # print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
+board.move_piece([2,0],[3,3])
 
+print(board)
 
 
 
