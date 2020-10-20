@@ -9,6 +9,8 @@ Chess
 
 """
 
+import os
+
 # Type of pieces tuple
 PIECES =("rook","knight","bishop","king","queen","bishop","knight","rook","pawn")
 TEAM = ("White","Black")
@@ -20,7 +22,7 @@ class Piece(object):
         self.team = team # White or Black
 
     def __str__(self):
-        return f'{self.type}'
+        return f'{self.team[0]}{self.type}'
 
     def move_king_knight(self,actual_position):
         """This functions is for kings only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
@@ -70,22 +72,6 @@ class Piece(object):
         pos_mov = [[a_r+row,a_c+column] for row in rows for column in columns if not (row!=0 and column in [2,-2])]
 
         return pos_mov
-
-    # def move_knight(self,actual_position):
-    #     """This functions is for knights only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
-    #     if self.type != "knight":
-    #         raise TypeError('Not "knight" piece type')
-
-    #     a_r,a_c = actual_position #piece actual row and column indexes
-    #     pos_mov = [] #array containing possible moves of piece
-
-    #     # Building the 8 possible places for the knight
-    #     pos_mov = [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]]
-
-    #     #Possible movement array, not considering friends or foes. Conditional to avoid out of board places.
-    #     pos_mov = [[a_r+row,a_c+column] for row,column in pos_mov if a_r+row>=0 and a_c+column>=0 and a_r+row<=7 and a_c+column<=7]
-
-    #     return pos_mov
 
     def move_queen_rook_bishop(self,actual_position):
         """This functions is for queens, bishops or rooks only, takes actual position on the board [row,column] and returns an array of possible moves not considering friends or foes"""
@@ -222,15 +208,19 @@ class Board(object):
         # self.blacks.append(b_high)
 
     def __str__(self):
-        print('\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t6\t\t7')
+        # header = '\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t6\t\t7'
+        header = '\t0\t1\t2\t3\t4\t5\t6\t7'
+
+        print(header)
+        l = 'ABCDEFGH'
         r = 0
         for row in self.board:
-            print(r, end = '\t')
+            print(l[r], end = '\t')
             for piece in row:
                 print(piece, end = '\t')
-            print(r)
+            print(l[r])
             r+=1
-        print('\t0\t\t1\t\t2\t\t3\t\t4\t\t5\t\t6\t\t7')
+        print(header)
         return ""
 
     def kill_piece(self,position:list,killed=True):
@@ -257,19 +247,173 @@ class Board(object):
         self.board[n_r][n_c] = self.board[a_r][a_c]
         self.kill_piece([a_r,a_c],False)
 
+def clear():
+    os.system('cls')
+
+def coordinates(player_input):
+    if len(player_input) != 2: # Validating for 2 coordinates
+        return None,None
+
+    a,b = player_input
+    l = 'ABCDEFGH' #accepted letters
+    r = 0 #row
+    c = 0 #column
 
 
+    if a.isdigit():
+        if int(a)<8: #valid column less than eight
+            c = int(a)
+        else:
+            return None,None
+
+        if b.isalpha():
+            if b.upper() in l: # coordinate is a valid letter?
+                r = l.index(b.upper())
+            else:
+                return None,None
+        else: #runs if there is no letter
+            return None,None
+
+    elif b.isdigit():
+        if int(b)<8: #valid column less than eight
+            c = int(b)
+        else:
+            return None,None
+
+        if a.isalpha():
+            if a.upper() in l: # coordinate is a valid letter?
+                r = l.index(a.upper())
+            else:
+                return None,None
+        else: #runs if there is no letter
+            return None,None
+
+    else: # runs if neither a nor b are numbers
+        return None,None
+
+    return r,c
 
 """Vs cpu hacer elección al azar de pieza y de movimiento"""
-
-
-
-
+"""Crear rama w1 project en datamex python projects y poner ahí el proyecto"""
 
 
 board = Board()
 
-print(board)
+# Hacer introducción al juego
+
+# 2 jugadores o vs CPU?
+
+# Instrucciones del juego (opcional para el usuario)
+    # imprimir board como ejemplo
+
+playing = True
+
+while playing:
+
+    clear()
+    print(board)
+    print('Whites turn...')
+
+    while True: # White loop
+
+        print("Choose the piece you want to move.")
+        white_piece = input("Piece's coordinates: ")
+        r,c = coordinates(white_piece) # checking for valid input.
+
+        # conditionals checking valid coordinates: inside board, non-empty square, white piece, and able-to-move piece
+        if [r,c] == [None,None]: # If coordinate is not valid
+            clear()
+            print(board)
+            print('Whites turn...')
+            print('Please type a valid coordinate, a row (letter) and a column (number) inside the board.')
+            print('Example: a1 or 1a.')
+            continue
+
+        if type(board.board[r][c]) != type(Piece('rook','White')): # if an empty square is chosen
+            clear()
+            print(board)
+            print('Whites turn...')
+            print('Please choose a coordinate with a piece.')
+            continue
+
+        elif board.board[r][c].team != 'White': # if a black piece is selected
+            clear()
+            print(board)
+            print('Whites turn...')
+            print('Please choose a coordinate with a white piece.')
+            continue
+
+        #Chosen piece's possible movements
+        pos_mov = board.board[r][c].possible_moves([r,c],board.board)
+
+        if len(pos_mov) == 0: # Checking wether there are possible moves for the chosen piece
+            clear()
+            print(board)
+            print('Whites turn...')
+            print('Please choose a piece that can be moved.')
+            continue
+
+        print(pos_mov)
+
+        while True: #Once a valid piece is chosen it can't be changed, movement decision loop
+            clear()
+            print(board)
+            print(f'Where do you want to move your {board.board[r][c].type} in {white_piece} to?')
+
+            white_move = input("")
+            r_n,c_n = coordinates(white_move) # checking for valid input.
+
+            if [r_n,c_n] not in pos_mov:
+                clear()
+                print(board)
+                print(f'{white_move} is not a valid movement, valid movements are:')
+                print(pos_mov)
+                continue
+
+            break
+
+        clear()
+        board.move_piece([r,c],[r_n,c_n]) #Moving piece to desired location
+        print(board)
+
+
+
+        if len(input('seguir? '))> 0:
+            clear()
+            print(board)
+            print('Whites turn...')
+        else:
+            break
+
+
+    break
+
+
+
+
+
+
+
+
+
+
+
+
+# print(coordinates('a1'))
+# print(coordinates('1a'))
+# print(coordinates('B7'))
+# print(coordinates('H0'))
+# print(coordinates('1h'))
+# print(coordinates('7c'))
+# print(coordinates('77'))
+# print(coordinates('cc'))
+# print(coordinates(''))
+
+
+
+# board = Board()
+
+# print(board)
 # board.kill_piece([3,1])
 # board.board[3][0].possible_moves([3,0],board.board)
 # print(board)
@@ -284,13 +428,15 @@ print(board)
 # print(board.board[2][0].move_queen_rook_bishop([2,0]))
 
 # row = 0
-for row in range(8):
-    board.kill_piece([row,1])
-    board.kill_piece([row,6])
+# for row in range(8):
+#     board.kill_piece([row,1])
+#     board.kill_piece([row,6])
 
-print(board)
 
-print(board.board[1][7].possible_moves([1,7],board.board))
+
+# print(board)
+
+# print(board.board[1][7].possible_moves([1,7],board.board))
 # print(board.board[6][1].move_pawn([6,1]))
 # print(board.board[1][0].move_knight([1,0]))
 # print(board.board[6][0].move_knight([6,0]))
@@ -306,3 +452,6 @@ print(board.board[1][7].possible_moves([1,7],board.board))
 
 
 
+# clear()
+
+# print(board)
