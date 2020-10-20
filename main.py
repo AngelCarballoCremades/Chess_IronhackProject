@@ -215,10 +215,10 @@ class Board(object):
         l = 'ABCDEFGH'
         r = 0
         for row in self.board:
-            print(l[r], end = '\t')
+            print('    ',l[r], end = '\t')
             for piece in row:
                 print(piece, end = '\t')
-            print(l[r])
+            print(' ',l[r])
             r+=1
         print(header)
         return ""
@@ -323,33 +323,40 @@ def check_win(board):
 
     return False if number_of_kings == 2 else True
 
-
-
-
-
-
-
-
-
-
-
-
-"""Vs cpu hacer elección al azar de pieza y de movimiento"""
-"""Crear rama w1 project en datamex python projects y poner ahí el proyecto"""
+"""GAME BEGINS"""
 
 clear() #clear output
 board = Board()
 
 
-# Hacer introducción al juego
+# Game intro
+print("""
+    HELLO TO CHESS BY ANGEL, THIS IS THE PROJECT FROM WEEK 1.
 
-# 2 jugadores o vs CPU?
+    RULES ARE LIKE CLASSIC CHESS BUT CASTLING IS NOT ALLOWED.
 
-# Instrucciones del juego (opcional para el usuario)
-    # imprimir board como ejemplo
+    YOU WILL BE ASKED TO ENTER THE COORDINATES OF LOCATIONS (LETTER-NUMBER ---> a1)
+    TO CHOOSE PIECES TO BE MOVED AND SQUARES TO MOVE THEM TO.
+    WHITE PIECES START WITH 'W' AND BLACK PIECES WITH 'B'\n""")
+
+print(board)
+
+print("""
+    IF A PAWN GETS TO THE ENEMIES' FIRST ROW IT CAN BECOME ANY PIECE (EXCEPT KING...)
+
+    THE GAME ENDS WHEN A KING IS KILLED
+
+    GOOD LUCK!!!""")
+
+input('(press enter to continue)')
+# End of game intro
+
+
 winner = ''
-playing = False
+l = 'ABCDEFGH'
+playing = True
 
+# MAIN GAME LOOP
 while playing:
 
     clear()
@@ -395,11 +402,10 @@ while playing:
             print('Please choose a piece that can be moved.')
             continue
 
-        print(pos_mov)
+        clear()
+        print(board)
 
         while True: #Once a valid piece is chosen it can't be changed, movement decision loop
-            clear()
-            print(board)
             print(f'Where do you want to move your {board.board[r][c].type} in {white_piece} to?')
 
             white_move = input("")
@@ -409,7 +415,7 @@ while playing:
                 clear()
                 print(board)
                 print(f'{white_move} is not a valid movement, valid movements are:')
-                print(pos_mov)
+                print([[l[row],column] for row,column in pos_mov])
                 continue
 
             break
@@ -465,11 +471,10 @@ while playing:
             print('Please choose a piece that can be moved.')
             continue
 
-        print(pos_mov)
+        clear()
+        print(board)
 
         while True: #Once a valid piece is chosen it can't be changed, movement decision loop
-            clear()
-            print(board)
             print(f'Where do you want to move your {board.board[r][c].type} in {black_piece} to?')
 
             black_move = input("")
@@ -479,7 +484,7 @@ while playing:
                 clear()
                 print(board)
                 print(f'{black_move} is not a valid movement, valid movements are:')
-                print(pos_mov)
+                print([[l[row],column] for row,column in pos_mov])
                 continue
 
             break
@@ -498,76 +503,3 @@ clear()
 print(board)
 print(f'THE GAME HAS ENDED!! {winner} TEAM HAS WON!!\n\n\n')
 print("Thank you for playing :)")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# print(coordinates('a1'))
-# print(coordinates('1a'))
-# print(coordinates('B7'))
-# print(coordinates('H0'))
-# print(coordinates('1h'))
-# print(coordinates('7c'))
-# print(coordinates('77'))
-# print(coordinates('cc'))
-# print(coordinates(''))
-
-
-
-# board = Board()
-
-# print(board)
-# board.kill_piece([3,1])
-# board.board[3][0].possible_moves([3,0],board.board)
-# print(board)
-
-# print(board.board[3][7].move_king([3,7]))
-# print(board.board[6][1].move_pawn([6,1]))
-# print(board.board[1][0].move_knight([1,0]))
-# print(board.board[6][0].move_knight([6,0]))
-# print(board.board[1][7].move_knight([1,7]))
-# print(board.board[6][7].move_knight([6,7]))
-# print(board.board[4][0].move_queen_rook_bishop([4,0]))
-# print(board.board[2][0].move_queen_rook_bishop([2,0]))
-
-# row = 0
-# for row in range(8):
-#     board.kill_piece([row,1])
-#     board.kill_piece([row,6])
-
-
-
-# print(board)
-
-# print(board.board[1][7].possible_moves([1,7],board.board))
-# print(board.board[6][1].move_pawn([6,1]))
-# print(board.board[1][0].move_knight([1,0]))
-# print(board.board[6][0].move_knight([6,0]))
-# print(board.board[1][7].move_knight([1,7]))
-# print(board.board[6][7].move_knight([6,7]))
-# print(board.board[4][0].move_queen_rook_bishop([4,0]))
-# print(board.board[2][0].move_queen_rook_bishop([2,0]))
-
-# board.move_piece([2,0],[3,6])
-# print(board)
-# board.move_piece([3,0],[4,6])
-# print(board)
-
-
-
-# clear()
-
-# print(board)
