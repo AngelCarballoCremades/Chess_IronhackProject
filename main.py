@@ -247,6 +247,25 @@ class Board(object):
         self.board[n_r][n_c] = self.board[a_r][a_c]
         self.kill_piece([a_r,a_c],False)
 
+    def check_pawn(self,position):
+        """This function checks wether a pawn has crossed the board and changes its type"""
+        r,c = position
+
+        if self.board[r][c].type == 'pawn' and c in [0,7]:
+            print(f'\n    A {self.board[r][c].team} pawn has crossed the board!!\nIt can be promoted to queen, knight, rook or bishop.')
+            while True:
+                new_type = input('Chose a promotion: ')
+                if new_type in ["queen","bishop","knight","rook"]:
+                    self.board[r][c].type = new_type
+                    break
+                else:
+                    clear()
+                    print(self)
+                    print('Please enter a valid promotion.')
+        else:
+            pass
+
+
 def clear():
     os.system('cls')
 
@@ -293,11 +312,34 @@ def coordinates(player_input):
 
     return r,c
 
+def check_win(board):
+    """This function checks wether the game has ended by looking for the kings, if there is only one: True is returned, if both are alive: False is returned"""
+    number_of_kings = 0
+    for row in board:
+        for piece in row:
+            if type(piece) != type(None):
+                if piece.type == 'king':
+                    number_of_kings +=1
+
+    return False if number_of_kings == 2 else True
+
+
+
+
+
+
+
+
+
+
+
+
 """Vs cpu hacer elección al azar de pieza y de movimiento"""
 """Crear rama w1 project en datamex python projects y poner ahí el proyecto"""
 
-
+clear() #clear output
 board = Board()
+
 
 # Hacer introducción al juego
 
@@ -305,8 +347,8 @@ board = Board()
 
 # Instrucciones del juego (opcional para el usuario)
     # imprimir board como ejemplo
-
-playing = True
+winner = ''
+playing = False
 
 while playing:
 
@@ -320,7 +362,7 @@ while playing:
         white_piece = input("Piece's coordinates: ")
         r,c = coordinates(white_piece) # checking for valid input.
 
-        # conditionals checking valid coordinates: inside board, non-empty square, white piece, and able-to-move piece
+        # conditionals checking valid coordinates: inside board, non-empty square, White piece, and able-to-move piece
         if [r,c] == [None,None]: # If coordinate is not valid
             clear()
             print(board)
@@ -340,7 +382,7 @@ while playing:
             clear()
             print(board)
             print('Whites turn...')
-            print('Please choose a coordinate with a white piece.')
+            print('Please choose a coordinate with a White piece.')
             continue
 
         #Chosen piece's possible movements
@@ -374,19 +416,93 @@ while playing:
 
         clear()
         board.move_piece([r,c],[r_n,c_n]) #Moving piece to desired location
-        print(board)
+        break
 
+    board.check_pawn([r_n,c_n])#Is the pawn at the enemy's end?? type can be changed to other
+    print(board)
+    if check_win(board.board):
+        winner = 'WHITE'
+        break
 
+    print('Blacks turn...')
 
-        if len(input('seguir? '))> 0:
+    while True: # Black loop
+
+        print("Choose the piece you want to move.")
+        black_piece = input("Piece's coordinates: ")
+        r,c = coordinates(black_piece) # checking for valid input.
+
+        # conditionals checking valid coordinates: inside board, non-empty square, Black piece, and able-to-move piece
+        if [r,c] == [None,None]: # If coordinate is not valid
             clear()
             print(board)
-            print('Whites turn...')
-        else:
+            print('Blacks turn...')
+            print('Please type a valid coordinate, a row (letter) and a column (number) inside the board.')
+            print('Example: a1 or 1a.')
+            continue
+
+        if type(board.board[r][c]) != type(Piece('rook','Black')): # if an empty square is chosen
+            clear()
+            print(board)
+            print('Blacks turn...')
+            print('Please choose a coordinate with a piece.')
+            continue
+
+        elif board.board[r][c].team != 'Black': # if a black piece is selected
+            clear()
+            print(board)
+            print('Blacks turn...')
+            print('Please choose a coordinate with a Black piece.')
+            continue
+
+        #Chosen piece's possible movements
+        pos_mov = board.board[r][c].possible_moves([r,c],board.board)
+
+        if len(pos_mov) == 0: # Checking wether there are possible moves for the chosen piece
+            clear()
+            print(board)
+            print('Blacks turn...')
+            print('Please choose a piece that can be moved.')
+            continue
+
+        print(pos_mov)
+
+        while True: #Once a valid piece is chosen it can't be changed, movement decision loop
+            clear()
+            print(board)
+            print(f'Where do you want to move your {board.board[r][c].type} in {black_piece} to?')
+
+            black_move = input("")
+            r_n,c_n = coordinates(black_move) # checking for valid input.
+
+            if [r_n,c_n] not in pos_mov:
+                clear()
+                print(board)
+                print(f'{black_move} is not a valid movement, valid movements are:')
+                print(pos_mov)
+                continue
+
             break
 
+        clear()
+        board.move_piece([r,c],[r_n,c_n]) #Moving piece to desired location
+        break
 
-    break
+    board.check_pawn([r_n,c_n])#Is the pawn at the enemy's end?? type can be changed to other
+    print(board)
+    if check_win(board.board):
+        winner = 'BLACK'
+        break
+
+clear()
+print(board)
+print(f'THE GAME HAS ENDED!! {winner} TEAM HAS WON!!\n\n\n')
+print("Thank you for playing :)")
+
+
+
+
+
 
 
 
